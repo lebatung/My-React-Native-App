@@ -1,4 +1,6 @@
+// Screens/RootScreens.ts
 export enum RootScreens {
-  MAIN = "Main",
-  WELCOME = "Welcome",
+  WELCOME = "WELCOME",
+  MAIN = "MAIN",
+  LOGIN = "LOGIN",
 }
