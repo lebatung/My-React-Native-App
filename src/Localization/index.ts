@@ -6,7 +6,6 @@ export enum Language {
   "VIETNAMESE" = "vi",
 }
 
-// Set the key-value pairs for the different languages you want to support.
 export const i18n = new I18n({
   [Language.VIETNAMESE]: vi,
   [Language.ENGLISH]: en,

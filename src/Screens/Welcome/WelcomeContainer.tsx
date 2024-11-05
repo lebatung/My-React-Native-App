@@ -5,15 +5,15 @@ import { RootStackParamList } from "@/Navigation";
 import { RootScreens } from "..";
 
 type WelcomeScreenNavigatorProps = NativeStackScreenProps<
-  RootStackParamList,
-  RootScreens.WELCOME
+  RootStackParamList
+  //RootScreens.WELCOME
 >;
 
 export const WelcomeContainer = ({
   navigation,
 }: WelcomeScreenNavigatorProps) => {
   const onNavigate = (screen: RootScreens) => {
-    navigation.navigate(screen);
+    //navigation.navigate(screen);
   };
 
   return <Welcome onNavigate={onNavigate} />;
