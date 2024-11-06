@@ -30,11 +30,8 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
       });
 
       if (response.data.access_token && response.data.refresh_token) {
-        // Lưu cả access_token và refresh_token vào AsyncStorage
         await AsyncStorage.setItem('access_token', response.data.access_token);
         await AsyncStorage.setItem('refresh_token', response.data.refresh_token);
-
-        // Điều hướng đến màn hình chính
         navigation.navigate(RootScreens.MAIN);
       } else {
         setError("Không nhận được token từ server");
