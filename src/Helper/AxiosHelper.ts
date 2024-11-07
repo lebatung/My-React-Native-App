@@ -1,21 +1,39 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+interface ApiResponse<T> {
+  data: T;
+  message: string;
+  status: number;
+}
+interface ApiErrorData {
+  message?: string;
+}
+interface ErrorResponse {
+  message: string;
+  status: number;
+}
+
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://8989-2405-4803-d93b-a120-90ab-458d-d276-c8b2.ngrok-free.app/api',
+  baseURL: process.env.REACT_APP_API_URL || 'https://5515-112-197-236-168.ngrok-free.app/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
   }
 });
 
 axiosInstance.interceptors.request.use(
   async (config) => {
-    const token = await AsyncStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    } catch (error) {
+      return Promise.reject(error);
     }
-    return config;
   },
   (error: AxiosError) => {
     return Promise.reject(error);
@@ -23,26 +41,92 @@ axiosInstance.interceptors.request.use(
 );
 
 axiosInstance.interceptors.response.use(
-  (response) => response.data,
-  (error: AxiosError) => {
+  (response: AxiosResponse) => {
+    return response.data;
+  },
+  async (error: AxiosError) => {
+    const originalRequest = error.config;
+
     if (error.response) {
       switch (error.response.status) {
-        case 401:
-          AsyncStorage.removeItem('token');
+        case 401: {
+
+          if (originalRequest && !originalRequest.url?.includes('refresh-token')) {
+            try {
+
+              const refreshToken = await AsyncStorage.getItem('refreshToken');
+              const response = await axiosInstance.post('/auth/refresh-token', {
+                refreshToken,
+              });
+
+              if (response.data.token) {
+                await AsyncStorage.setItem('token', response.data.token);
+
+                originalRequest.headers.Authorization = `Bearer ${response.data.token}`;
+                return axiosInstance(originalRequest);
+              }
+            } catch (refreshError) {
+
+              await AsyncStorage.multiRemove(['token', 'refreshToken']);
+
+              return Promise.reject(refreshError);
+            }
+          }
           break;
-        default:
+        }
+        case 403:
+ 
+          break;
+        case 404:
+
+          break;
+        case 500:
+
           break;
       }
     }
-    return Promise.reject(error);
+
+    const errorResponse: ErrorResponse = {
+      message: (error.response?.data as ApiErrorData)?.message || 'Đã có lỗi xảy ra',
+      status: error.response?.status || 500,
+    };
+
+    return Promise.reject(errorResponse);
   }
 );
 
 export const ApiHelper = {
-  get: async <T>(url: string, params?: any) => axiosInstance.get<T>(url, { params }),
-  post: async <T>(url: string, data?: any) => axiosInstance.post<T>(url, data),
-  put: async <T>(url: string, data?: any) => axiosInstance.put<T>(url, data),
-  delete: async <T>(url: string) => axiosInstance.delete<T>(url),
+  get: async <T>(url: string, params?: any): Promise<ApiResponse<T>> => {
+    try {
+      return await axiosInstance.get(url, { params });
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  post: async <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> => {
+    try {
+      return await axiosInstance.post(url, data, config);
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  put: async <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> => {
+    try {
+      return await axiosInstance.put(url, data, config);
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  delete: async <T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> => {
+    try {
+      return await axiosInstance.delete(url, config);
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 export default ApiHelper;

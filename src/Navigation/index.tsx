@@ -19,10 +19,9 @@ const ApplicationNavigator = () => {
     return (
         <NavigationContainer>
             <StatusBar />
-            <RootStack.Navigator initialRouteName={RootScreens.MAIN} screenOptions={{ headerShown: false }}>
-                <RootStack.Screen name={RootScreens.MAIN} component={MainNavigator} />
-                {/* <RootStack.Screen name={RootScreens.LOGIN} component={LoginScreen} /> */}
-                
+            <RootStack.Navigator initialRouteName={RootScreens.LOGIN} screenOptions={{ headerShown: false }}>
+                <RootStack.Screen name={RootScreens.LOGIN} component={LoginScreen} />
+                <RootStack.Screen name={RootScreens.MAIN} component={MainNavigator} /> 
             </RootStack.Navigator>
         </NavigationContainer>
     );

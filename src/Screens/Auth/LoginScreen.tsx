@@ -22,23 +22,35 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
   }
 
   const onLogin = async () => {
+    if (!username || !password) {
+      setError("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu");
+      return;
+    }
+  
     try {
       setError("");
       const response = await ApiHelper.post<LoginResponse>('/login', {
-        username,
-        password
+        username, 
+        password 
       });
 
-      if (response.data.access_token && response.data.refresh_token) {
+      console.log('Full Response:', response);
+      console.log('Response Data:', response.data);
+  
+      if (response?.data?.access_token && response?.data?.refresh_token) {
         await AsyncStorage.setItem('access_token', response.data.access_token);
         await AsyncStorage.setItem('refresh_token', response.data.refresh_token);
         navigation.navigate(RootScreens.MAIN);
       } else {
-        setError("Không nhận được token từ server");
+        setError("Đăng nhập thất bại");
+        console.warn('Token không tồn tại trong response:', response);
       }
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message || "Đăng nhập thất bại");
+    } catch (err: any) {
+      console.warn('Error:', err);
+      if (err.response?.data) {
+        setError(err.response.data.message || "Đăng nhập thất bại");
+      } else if (err instanceof Error) {
+        setError(err.message || "Có lỗi xảy ra, vui lòng thử lại");
       } else {
         setError("Có lỗi xảy ra, vui lòng thử lại");
       }
@@ -48,7 +60,7 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
   return (
     <View style={styles.container}>
       <Text fontSize="2xl" fontWeight="bold">
-        {i18n.t(LocalizationKey.LOGIN_TITLE)}
+        Đăng nhập
       </Text>
       <Input
         placeholder={i18n.t(LocalizationKey.USERNAME)}
@@ -64,7 +76,7 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
         mt={4}
       />
       <Button onPress={onLogin} mt={6}>
-        {i18n.t(LocalizationKey.LOGIN_BUTTON)}
+        Đăng nhập
       </Button>
       {error ? <Text color="red.500">{error}</Text> : null}
     </View>
