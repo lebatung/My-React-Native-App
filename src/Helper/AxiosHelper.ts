@@ -15,7 +15,7 @@ interface ErrorResponse {
 }
 
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://5515-112-197-236-168.ngrok-free.app/api',
+  baseURL: process.env.REACT_APP_API_URL || 'https://3c96-42-112-80-167.ngrok-free.app/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

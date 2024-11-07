@@ -14,6 +14,7 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   interface LoginResponse {
     access_token: string;
@@ -22,6 +23,8 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
   }
 
   const onLogin = async () => {
+    setIsLoading(true);
+    
     if (!username || !password) {
       setError("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu");
       return;
@@ -54,6 +57,8 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
       } else {
         setError("Có lỗi xảy ra, vui lòng thử lại");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 

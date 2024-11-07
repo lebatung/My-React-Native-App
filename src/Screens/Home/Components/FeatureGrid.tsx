@@ -1,10 +1,13 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, Pressable, Icon, Box } from 'native-base';
+import { RootScreens } from '@/Screens';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 const features = [
-  { icon: '🏠', title: 'Hộ gia đình' },
-  { icon: '🏢', title: 'Tổ chức' },
+  { icon: '🏠', title: 'Hộ gia đình', screen: RootScreens.HOUSEHOLD },
+  { icon: '🏢', title: 'Tổ chức', screen: RootScreens.ORGANIZATION },
   { icon: '🔍', title: 'Thu thập cung lao động ban đầu' },
   { icon: '📊', title: 'Thu thập cung lao động ban đầu' },
   { icon: '🗺️', title: 'Bản đồ cung lao động' },
@@ -12,8 +15,20 @@ const features = [
   { icon: '📈', title: 'Thống kê cung lao động' },
   { icon: '📊', title: 'Thống kê cầu lao động' },
 ];
+type RootStackParamList = {
+  [key in RootScreens]: undefined;
+};
 
 export const FeatureGrid = () => {
+
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const handleFeaturePress = (feature: typeof features[0]) => {
+    if (feature.screen) {
+      navigation.navigate(feature.screen);
+    }
+  };
+  
   return (
     <Box 
       bg="white" 
@@ -40,6 +55,7 @@ export const FeatureGrid = () => {
               <Pressable 
                 style={styles.feature}
                 android_ripple={{ color: 'rgba(0,0,0,0.1)' }}
+                onPress={() => handleFeaturePress(feature)}
               >
                 <Text fontSize={14}>{feature.icon}</Text>
                 <Text fontSize={11} textAlign="center" mt={2} numberOfLines={2}>{feature.title}</Text>

@@ -11,7 +11,7 @@ export const ProfileHeader = () => {
           source={require('../../../../assets/avatar.png')}
         />
         <View style={styles.info}>
-          <Text fontSize="lg" fontWeight="bold">Admin</Text>
+          <Text fontSize="lg" fontWeight="bold">Bùi Thanh Hoàng</Text>
           <Text fontSize="sm" color="gray.600">Mã đơn vị: 095 - Tỉnh Bạc Liêu</Text>
         </View>
       </View>

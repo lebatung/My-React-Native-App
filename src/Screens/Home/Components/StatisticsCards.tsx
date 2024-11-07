@@ -1,9 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Text, Box } from 'native-base';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-
+import { ApiHelper } from "@/Helper/AxiosHelper";
 export const StatisticsCards = () => {
-  const [activeTab, setActiveTab] = useState('labor'); // 'labor' hoặc 'organization'
+  const [activeTab, setActiveTab] = useState('labor');
+  const [employmentData, setEmploymentData] = useState([]);
+  const [organizationData, setOrganizationData] = useState([]);
+  const [inactiveTotal, setInactiveTotal] = useState(0);
+
+  useEffect(() => {
+
+    const fetchData = async () => {
+      try {
+        const response = await ApiHelper.get('/dashboard');
+        console.log(response.data);
+        const data = response.data as {
+          employmentStatus: {
+            items: any[];
+            summary: {
+              totalPeople: number;
+            };
+          };
+          organizationStatus: {
+            items: any[];
+          };
+        };
+        setEmploymentData(data.employmentStatus.items as never[]);
+        setOrganizationData(data.organizationStatus.items as never[]);
+        setInactiveTotal(data.employmentStatus.summary.totalPeople);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const renderContent = () => {
     if (activeTab === 'labor') {
@@ -57,7 +88,7 @@ export const StatisticsCards = () => {
       
       <Box style={[styles.card, { backgroundColor: '#9E9E9E', marginTop: 12 }]}>
         <Text color="white" fontSize="lg" fontWeight="bold">
-          {activeTab === 'labor' ? 'Không tham gia hoạt động kinh tế' : 'Không tìm thấy'}
+          {activeTab === 'labor' ? 'Không tham gia hoạt động kinh tế' : 'Tổng '}
         </Text>
         <Text color="white" fontSize="xl">1.245 {activeTab === 'labor' ? 'người' : 'tổ chức'}</Text>
       </Box>
