@@ -2,10 +2,47 @@ import React, { useState, useEffect } from 'react';
 import { Text, Box } from 'native-base';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { ApiHelper } from "@/Helper/AxiosHelper";
+
+interface EmploymentItem {
+  code: string;
+  display: string;
+  description: string;
+  total: number;
+  percentage: number;
+}
+
+interface OrganizationItem {
+  code: string;
+  display: string;
+  description: string;
+  total: number;
+  percentage: number;
+}
+
+interface DashboardResponse {
+  employmentStatus: {
+    items: EmploymentItem[];
+    summary: {
+      totalPeople: number;
+      employmentRate: number;
+      unemploymentRate: number;
+      inactiveRate: number;
+    };
+  };
+  organizationStatus: {
+    items: OrganizationItem[];
+    summary: {
+      totalOrganizations: number;
+      activeRate: number;
+      inactiveRate: number;
+    };
+  };
+}
+
 export const StatisticsCards = () => {
   const [activeTab, setActiveTab] = useState('labor');
-  const [employmentData, setEmploymentData] = useState([]);
-  const [organizationData, setOrganizationData] = useState([]);
+  const [employmentData, setEmploymentData] = useState<EmploymentItem[]>([]);
+  const [organizationData, setOrganizationData] = useState<OrganizationItem[]>([]);
   const [inactiveTotal, setInactiveTotal] = useState(0);
 
   useEffect(() => {
@@ -38,28 +75,35 @@ export const StatisticsCards = () => {
 
   const renderContent = () => {
     if (activeTab === 'labor') {
+      const employed = employmentData.find(item => item.code === 'EMPLOYED');
+      const unemployed = employmentData.find(item => item.code === 'UNEMPLOYED');
+      
       return (
         <>
           <Box style={[styles.card, { backgroundColor: '#2196F3' }]}>
             <Text color="white" fontSize="lg" fontWeight="bold">Có việc làm</Text>
-            <Text color="white" fontSize="xl">1.245 người</Text>
+            <Text color="white" fontSize="xl">{employed?.total || 0} người</Text>
           </Box>
           <Box style={[styles.card, { backgroundColor: '#009688' }]}>
             <Text color="white" fontSize="lg" fontWeight="bold">Thất nghiệp</Text>
-            <Text color="white" fontSize="xl">1.245 người</Text>
+            <Text color="white" fontSize="xl">{unemployed?.total || 0} người</Text>
           </Box>
         </>
       );
     }
+
+    const active = organizationData.find(item => item.code === 'ACTIVE');
+    const inactive = organizationData.find(item => item.code === 'INACTIVE');
+    
     return (
       <>
         <Box style={[styles.card, { backgroundColor: '#2196F3' }]}>
           <Text color="white" fontSize="lg" fontWeight="bold">Đang hoạt động</Text>
-          <Text color="white" fontSize="xl">1.245 tổ chức</Text>
+          <Text color="white" fontSize="xl">{active?.total || 0} tổ chức</Text>
         </Box>
         <Box style={[styles.card, { backgroundColor: '#009688' }]}>
           <Text color="white" fontSize="lg" fontWeight="bold">Ngưng hoạt động</Text>
-          <Text color="white" fontSize="xl">1.245 tổ chức</Text>
+          <Text color="white" fontSize="xl">{inactive?.total || 0} tổ chức</Text>
         </Box>
       </>
     );
@@ -88,9 +132,13 @@ export const StatisticsCards = () => {
       
       <Box style={[styles.card, { backgroundColor: '#9E9E9E', marginTop: 12 }]}>
         <Text color="white" fontSize="lg" fontWeight="bold">
-          {activeTab === 'labor' ? 'Không tham gia hoạt động kinh tế' : 'Tổng '}
+          {activeTab === 'labor' ? 'Không tham gia hoạt động kinh tế' : 'Tổng số tổ chức'}
         </Text>
-        <Text color="white" fontSize="xl">1.245 {activeTab === 'labor' ? 'người' : 'tổ chức'}</Text>
+        <Text color="white" fontSize="xl">
+          {activeTab === 'labor' 
+            ? `${employmentData.find(item => item.code === 'INACTIVE')?.total || 0} người`
+            : `${organizationData.find(item => item.code === 'TOTAL')?.total || 0} tổ chức`}
+        </Text>
       </Box>
     </Box>
   );

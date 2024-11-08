@@ -1,5 +1,8 @@
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '@env';
+
+console.log('Check API_URL:', API_URL);
 
 interface ApiResponse<T> {
   data: T;
@@ -15,27 +18,31 @@ interface ErrorResponse {
 }
 
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://3c96-42-112-80-167.ngrok-free.app/api',
+  baseURL: API_URL || 'https://215c-112-197-236-168.ngrok-free.app/api',
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    'Accept': 'application/json'
   }
 });
 
 axiosInstance.interceptors.request.use(
   async (config) => {
+    if (config.method !== 'get') {
+      config.headers['Content-Type'] = 'application/json';
+    }
+    
     try {
-      const token = await AsyncStorage.getItem('token');
+      const token = await AsyncStorage.getItem('access_token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-      return config;
     } catch (error) {
-      return Promise.reject(error);
+      console.error('Lỗi khi lấy token:', error);
     }
+    
+    return config;
   },
-  (error: AxiosError) => {
+  (error) => {
     return Promise.reject(error);
   }
 );
@@ -96,9 +103,9 @@ axiosInstance.interceptors.response.use(
 );
 
 export const ApiHelper = {
-  get: async <T>(url: string, params?: any): Promise<ApiResponse<T>> => {
+  get: async <T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> => {
     try {
-      return await axiosInstance.get(url, { params });
+      return await axiosInstance.get(url, config);
     } catch (error) {
       throw error;
     }
